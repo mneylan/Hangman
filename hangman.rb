@@ -1,3 +1,4 @@
+require 'yaml'
 
 class Hangman
   attr_reader :word, :display_letters
@@ -59,6 +60,31 @@ class Hangman
       @word_teaser = word.join(" ")
      
   end
+  
+  def save_game
+  File.open('save_game.yaml', 'w') do |file|
+  data = YAML.dump ({
+    :word => @word,
+    :display_letters => @display_letters,
+    :guesses => @guesses,
+    :word_teaser => @word_teaser,
+    :correct_guesses => @correct_guesses
+    })
+    file.puts data
+    end
+    
+    
+  end
+
+  def load_game
+  load_data = YAML.load(File.read('save_game.yaml'))
+  @word = load_data[:word]
+  @display_letters = load_data[:display_letters]
+  @guesses = load_data[:guesses]
+  @word_teaser = load_data[:word_teaser]
+  @correct_guesses = load_data[:correct_guesses]
+  end
+
   def guess_letter
     if @guesses > 0
             
@@ -70,6 +96,13 @@ class Hangman
       letter = gets.chomp.downcase
       #redo if bad_chars.include?(letter)
       #guessing = false
+      if letter == "save"
+      save_game
+      end
+      if letter == "load"
+      load_game
+      end
+
       if @word.include?(letter)
         puts
         puts "Nice guess!"
@@ -90,23 +123,29 @@ class Hangman
     end
   end
 
-  def game 
+  def game
+   
     puts "Welcome to Hangman my person. Your word is #{@word.length.to_s} letters long.\nYou have 7 lives to guess the word. For every incorrect guess, you lose a life. Good luck."
     puts "Here's a little preview of your word.  =>  #{print_teaser}"
+    puts "If you'd like to load a game, type 'load'."
     puts @word
     puts @word_teaser
     while guess_letter != "Game over."  
       if @correct_letters.length == @word.length
         puts "Congratulations player. You guessed the word."
+        return
       end
+      
       guess_letter
     end
     puts "Better luck next time player."
   end
   
+  
+  
 end
 
-prine = Hangman.new
+ prine = Hangman.new
 puts prine.game
 
 
